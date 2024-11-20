@@ -3,10 +3,15 @@ package me.ndkshr.poplar.ui.screen
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -31,17 +36,17 @@ fun ListScreen(modifier: Modifier = Modifier, newBlogTrigger: MutableState<Boole
 
         WebView(Modifier, reloadTrigger)
 
-        ElevatedButton(
+        IconButton (
             onClick = {
                 reloadTrigger.value = true
             },
             Modifier.constrainAs(reloadButton) {
                 top.linkTo(parent.top, 16.dp)
-                end.linkTo(parent.end, 16.dp)
+                start.linkTo(parent.start, 16.dp)
             },
             true
         ) {
-            Text("Reload")
+            Icon(Icons.Default.Refresh, contentDescription = "Example Icon", tint = Color.Black)
         }
 
         ElevatedButton(
@@ -50,12 +55,12 @@ fun ListScreen(modifier: Modifier = Modifier, newBlogTrigger: MutableState<Boole
             },
             modifier
                 .constrainAs(addBlogButton) {
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
+                    top.linkTo(reloadButton.top)
+                    bottom.linkTo(reloadButton.bottom)
                     end.linkTo(parent.end)
                 }
-                .fillMaxWidth()
-                .padding(20.dp),
+                .wrapContentWidth()
+                .padding(16.dp),
             true,
         ) {
             Text("Blog +")
