@@ -1,0 +1,12 @@
+package me.ndkshr.poplar.git
+
+/**
+    Replace your Constants for your project and GitHub Account
+*/
+
+object Constants {
+    const val TOKEN = ""
+    const val INDEX_HTML = ""
+    const val ORIGIN = ""
+    const val REPO = ""
+}
