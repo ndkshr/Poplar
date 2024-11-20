@@ -11,6 +11,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,6 +29,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)){ view, insets ->
+            val bottom = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+            view.updatePadding(bottom = bottom)
+            insets
+        }
+
         setContent {
             PoplarTheme {
                 val newBlogTrigger = remember { mutableStateOf(false) }
@@ -49,6 +58,7 @@ class MainActivity : ComponentActivity() {
                             withContext(Dispatchers.Main) {
                                 Toast.makeText(this@MainActivity, "$result -> ${blog.title}", Toast.LENGTH_SHORT).show()
                             }
+                            postBlogTrigger.value = null
                         }
                     }
                 }

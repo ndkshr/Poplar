@@ -43,4 +43,6 @@ ${START_OF_BLOG}
 <!--END-->
             
         """
+
+    fun canPost(): Boolean = title.isNotEmpty() && content.isNotEmpty() && tag.isNotEmpty()
 }
