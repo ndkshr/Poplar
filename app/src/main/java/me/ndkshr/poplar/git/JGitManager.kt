@@ -57,7 +57,10 @@ class JGitManager : GitManager {
         }
 
         git.add().addFilepattern(".").call()
-        git.commit().setMessage("${microBlog.tag}: ${microBlog.title}").call()
+        git.commit()
+            .setMessage("${microBlog.tag}: ${microBlog.title}")
+            .setCommitter(Constants.GIT_USERNAME, Constants.GIT_EMAIL)
+            .call()
         val pushCommand = git.push()
         val credentialsProvider = UsernamePasswordCredentialsProvider(Constants.TOKEN, "")
         pushCommand.setCredentialsProvider(credentialsProvider)
