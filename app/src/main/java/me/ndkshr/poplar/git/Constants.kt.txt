@@ -9,4 +9,6 @@ object Constants {
     const val INDEX_HTML = ""
     const val ORIGIN = ""
     const val REPO = ""
+    const val GIT_USERNAME = ""
+    const val GIT_EMAIL = ""
 }
