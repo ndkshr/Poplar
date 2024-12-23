@@ -3,9 +3,12 @@ package me.ndkshr.poplar.git
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import me.ndkshr.poplar.MicroBlog
-import me.ndkshr.poplar.MicroBlog.Companion.START_OF_BLOG
+import me.ndkshr.poplar.modal.MicroBlog
+import me.ndkshr.poplar.modal.MicroBlog.Companion.START_OF_BLOG
 import me.ndkshr.poplar.PoplarApplication
+import me.ndkshr.poplar.utils.AppUtils
+import me.ndkshr.poplar.utils.PrefConst
+import me.ndkshr.poplar.utils.SharedPrefUtils
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 import java.io.File
@@ -17,18 +20,25 @@ class JGitManager : GitManager {
     }
 
     override suspend fun cloneRepo(repoUri: String) = withContext(Dispatchers.IO) {
-        val tmpDir = createTempDir()
+        val internalDir = createTempDir()
+        val branch = if (AppUtils.isDebug()) {
+            "debug"
+        } else {
+            "main"
+        }
         Git.cloneRepository()
+            .setBranch(branch)
             .setURI(repoUri)
-            .setDirectory(tmpDir)
+            .setDirectory(internalDir)
             .call().use {
-                Log.d(TAG, "Cloned at ${tmpDir.name}")
+                Log.d(TAG, "Cloned at ${internalDir?.name}")
+                Log.d(TAG, "Branch: $branch")
             }
 
-        tmpDir
+        internalDir
     }
 
-    override suspend fun postBlog(microBlog: MicroBlog) = withContext(Dispatchers.IO) {
+    override suspend fun persistBlogRemote(microBlog: MicroBlog) = withContext(Dispatchers.IO) {
         val dir = PoplarApplication.gitManager.cloneRepo(Constants.REPO)
         val git = Git.open(dir)
 
@@ -66,6 +76,15 @@ class JGitManager : GitManager {
         pushCommand.setCredentialsProvider(credentialsProvider)
         pushCommand.setRemote(Constants.ORIGIN).call()
 
+        // Try persisting locally
+        persistBlogLocal(microBlog)
+
         "Posted"
+    }
+
+    override suspend fun persistBlogLocal(microBlog: MicroBlog) = withContext(Dispatchers.IO){
+        SharedPrefUtils.saveString(PrefConst.POST_TITLE, microBlog.title)
+        SharedPrefUtils.saveString(PrefConst.POST_TAGS, microBlog.tag)
+        SharedPrefUtils.saveString(PrefConst.POST_CONTENT, microBlog.content)
     }
 }

@@ -1,4 +1,4 @@
-package me.ndkshr.poplar
+package me.ndkshr.poplar.modal
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -15,7 +15,7 @@ data class MicroBlog(
 
         fun toHTML() =
         """
-${START_OF_BLOG}
+$START_OF_BLOG
 
 <!--START-->
 <h1 class="c2" id="h.hmvd5kvp20sd">

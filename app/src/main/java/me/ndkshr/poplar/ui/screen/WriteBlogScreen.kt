@@ -2,6 +2,7 @@ package me.ndkshr.poplar.ui.screen
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -20,17 +22,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import me.ndkshr.poplar.MicroBlog
+import me.ndkshr.poplar.MainActivity
+import me.ndkshr.poplar.R
+import me.ndkshr.poplar.modal.MicroBlog
 import me.ndkshr.poplar.ui.component.SaveBlogDialog
 import me.ndkshr.poplar.ui.theme.PoplarTheme
-import me.ndkshr.poplar.ui.theme.Purple80
+import me.ndkshr.poplar.utils.PrefConst
+import me.ndkshr.poplar.utils.SharedPrefUtils
+import me.ndkshr.poplar.utils.shortToast
 
 @Composable
 fun WriteBlogScreen(
@@ -41,10 +49,14 @@ fun WriteBlogScreen(
 
     val dialogTrigger = remember { mutableStateOf(false) }
 
-    val titleContent = remember { mutableStateOf("") }
-    val bodyContent = remember { mutableStateOf("") }
-    val tagContent = remember { mutableStateOf("") }
-    val context = LocalContext.current
+    val defaultTitle = SharedPrefUtils.getString(PrefConst.POST_TITLE, "")
+    val defaultTags = SharedPrefUtils.getString(PrefConst.POST_TAGS, "")
+    val defaultContent = SharedPrefUtils.getString(PrefConst.POST_CONTENT, "")
+
+    val titleContent = remember { mutableStateOf(defaultTitle) }
+    val bodyContent = remember { mutableStateOf(defaultContent) }
+    val tagContent = remember { mutableStateOf(defaultTags) }
+    val context = LocalContext.current as MainActivity
 
     BackHandler {
         backTrigger.value = false
@@ -55,34 +67,64 @@ fun WriteBlogScreen(
             .fillMaxSize()
             .background(Color.White)
     ) {
-        val (backBtn, pageName, titleView, contentView, tagView, submitBtn) = createRefs()
+        val (backBtn, pageName, titleView, contentView, tagView, submitBtn, clearBtn) = createRefs()
 
         Text(
-            "Blog +",
+            "Write",
             modifier = Modifier
-                .wrapContentWidth()
+                .fillMaxWidth()
                 .padding(16.dp)
                 .constrainAs(pageName) {
                     top.linkTo(parent.top)
-                    start.linkTo(parent.start)
+                    start.linkTo(backBtn.end)
+                    end.linkTo(parent.end)
                 },
             fontSize = 40.sp,
             color = Color.Black,
             textDecoration = TextDecoration.Underline
         )
 
-        ElevatedButton(
+        IconButton(
             {
                 backTrigger.value = false
             },
             modifier = Modifier
-                .padding(16.dp)
                 .constrainAs(backBtn) {
+                    top.linkTo(pageName.top)
+                    bottom.linkTo(pageName.bottom)
+                    start.linkTo(parent.start)
+                }
+                .padding(end = 16.dp)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.arrow_left),
+                contentDescription = "Go back",
+                modifier = Modifier.wrapContentWidth(),
+                contentScale = ContentScale.Crop
+            )
+        }
+
+        IconButton(
+            {
+                // TODO: Clear content
+                titleContent.value = ""
+                tagContent.value = ""
+                bodyContent.value = ""
+                context.shortToast("Cleared")
+            },
+            modifier = Modifier
+                .padding(16.dp)
+                .constrainAs(clearBtn) {
                     top.linkTo(parent.top)
                     end.linkTo(parent.end)
                 }
         ) {
-            Text("Back")
+            Image(
+                painter = painterResource(id = R.drawable.clear),
+                contentDescription = "Clear Content",
+                modifier = Modifier.wrapContentWidth(),
+                contentScale = ContentScale.Crop
+            )
         }
 
         TextField(
@@ -174,7 +216,7 @@ fun WriteBlogScreen(
             )
         )
 
-        ElevatedButton(
+        ElevatedButton (
             onClick = {
                 microBlog =
                     MicroBlog(titleContent.value, bodyContent.value, tagContent.value)
@@ -186,14 +228,21 @@ fun WriteBlogScreen(
             },
             Modifier
                 .constrainAs(submitBtn) {
-                    top.linkTo(backBtn.top)
-                    bottom.linkTo(backBtn.bottom)
-                    end.linkTo(backBtn.start)
+                    top.linkTo(clearBtn.top)
+                    bottom.linkTo(clearBtn.bottom)
+                    end.linkTo(clearBtn.start)
                 }
                 .padding(end = 16.dp),
-            colors = ButtonColors(Purple80, Color.Black, Color.White, Color.White),
+            colors = ButtonColors(Color.Black, Color.Black, Color.White, Color.White),
             enabled = true,
-        ) { Text("Post") }
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.send),
+                contentDescription = "Post Blog",
+                modifier = Modifier.wrapContentWidth(),
+                contentScale = ContentScale.Crop
+            )
+        }
 
         if (dialogTrigger.value) {
             SaveBlogDialog(
